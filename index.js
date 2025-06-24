@@ -11,7 +11,39 @@ const slicewidth = document.getElementById('slicewidth');
 const slicewidthVal = document.getElementById('slicewidthVal');
 const slicewidthMax = document.getElementById('slicewidthMax');
 
+//ANIMATION
+let rotation = 0;
+const ROTATION_SPEED = 0.5; // degrees per frame
+let isAnimating = false;
+let frame = null;
 
+const animateButton = document.getElementById('animate');
+function animate() {
+    rotation = (rotation + ROTATION_SPEED) % 360;
+    const sliceCount = parseInt(counter.value, 10);
+    const sliceWidth = parseInt(slicewidth.value, 10);
+
+    drawCurves(sliceCount, sliceWidth, rotation);
+    frame = requestAnimationFrame(animate);
+}
+
+function toggleAnimate() {
+    isAnimating = !isAnimating;
+
+    if (isAnimating) {
+        animate();
+    } else {
+        cancelAnimationFrame(frame)
+    }
+}
+
+animateButton.addEventListener('click', () => {
+    toggleAnimate();
+})
+//ANIMATION
+
+
+//counter and width handling
 const MIN_SLICECOUNT = 2;
 const MIN_SLICEWIDTH = 2;
 const MIN_GAP = 2;
@@ -48,17 +80,26 @@ slicewidth.addEventListener('input', () => {
         drawCurves(counter.value, slicewidthN);
     } 
 })
+//counter and width handling
 
 counter.dispatchEvent(new Event('input')); 
 
 
 function drawCurves(sliceCount = MIN_SLICECOUNT, sliceWidth = MIN_SLICEWIDTH) {
     gl.clearRect(0, 0, w, h);
+    
+     gl.save(); // Save canvas state
+    gl.translate(centerx, centery);
+    gl.rotate(degToRad(rotation));
+    gl.translate(-centerx, -centery); // Rotate around center
+
     const gap = (360-(sliceCount*sliceWidth))/sliceCount;
     console.log('gap',gap)
     let i=0;
     let x=360;
     let offset = 100;
+
+
     while (i < x) {
 
         let [endx,endy] = circumferencePoint(i); //end points of curve1
@@ -102,7 +143,9 @@ function drawCurves(sliceCount = MIN_SLICECOUNT, sliceWidth = MIN_SLICEWIDTH) {
         gl.fill();
         i += (parseInt(sliceWidth,10)+gap);
     }
+    gl.restore();
 }
+
 
 
 //
