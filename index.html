@@ -3,8 +3,22 @@
 <head>
     <meta charset="UTF-8" />
     <title>title</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body style="display: flex; flex: 1; justify-content: center;">
+<body style="display: flex; flex: 1; flex-direction:column; align-items: center;">
+ <div id="controls">
+  <div class="control-group" id="count-group">
+    <label for="counter">Slice Count: <span id="counterVal">2</span></label>
+    <label for="counter">Max Count: <span id="counterMax">90</span></label>
+    <input id="counter" type="range" min="2" max="90" value="2" />
+  </div>
+
+  <div class="control-group" id="width-group">
+    <label for="slicewidth">Slice Width: <span id="slicewidthVal">2</span></label>
+    <label for="slicewidth">Max Width: <span id="slicewidthMax">178</span></label>
+    <input id="slicewidth" type="range" min="2" max="178" value="2" />
+  </div>
+</div>
     <canvas id="glCanvas" width="640" height="640"></canvas>
     <script src="index.js"></script>
 </body>

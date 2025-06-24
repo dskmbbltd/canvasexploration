@@ -1,40 +1,68 @@
-window.onload = () => {
+document.addEventListener('DOMContentLoaded', () => {
 const canvas = document.querySelector('#glCanvas');
 const [w, h] = [canvas.width, canvas.height];
 const [centerx, centery] = [w/2, h/2];
 const gl = canvas.getContext('2d');
 
-// gl.beginPath();
-// // gl.lineTo(100, 75);
-// // gl.lineTo(100, 25);
+const counter = document.getElementById('counter');
+const counterVal = document.getElementById('counterVal');
+const counterMax = document.getElementById('counterMax');
+const slicewidth = document.getElementById('slicewidth');
+const slicewidthVal = document.getElementById('slicewidthVal');
+const slicewidthMax = document.getElementById('slicewidthMax');
 
 
+const MIN_SLICECOUNT = 2;
+const MIN_SLICEWIDTH = 2;
+const MIN_GAP = 2;
 
-// gl.arc(centerx, centery, centerx,degToRad(-90),degToRad(0),false);
-// gl.stroke();
-// // gl.moveTo(centerx,h);
-// gl.beginPath();
-// gl.arc(centerx, centery, centerx,degToRad(90),degToRad(180),false);
-// gl.stroke();
+counter.addEventListener('input', () => {
+    const slicecount = parseInt(counter.value, 10);
+    
+    if (!isNaN(slicecount) && slicecount >= MIN_SLICECOUNT) {
+        const maxWidth = Math.floor((360 - (slicecount*MIN_GAP)) / slicecount);
+        
+        slicewidth.max = maxWidth;
+        slicewidth.value = Math.max(MIN_SLICEWIDTH, Math.min(parseInt(slicewidth.value,10), maxWidth));
 
-// gl.beginPath()
-// gl.moveTo(centerx,centery);
-// let [endx,endy] = circumferencePoint(45);
-// gl.quadraticCurveTo(centerx-50, centery+50, endx, endy);
-// gl.stroke()
+        counterVal.textContent = slicecount;
+        counterMax.textContent = counter.max;
+        slicewidthMax.textContent = slicewidth.max;
+        slicewidthVal.textContent = slicewidth.value;
+        drawCurves(slicecount, slicewidth.value);
+    } 
+})
+slicewidth.addEventListener('input', () => {
+    const slicewidthN = parseInt(slicewidth.value, 10);
+    
+    if (!isNaN(slicewidthN) && slicewidthN >= MIN_SLICEWIDTH) {
+        const maxCount = Math.floor(360 / (slicewidthN + MIN_GAP));
+        
+        counter.max = maxCount;
+        counter.value = Math.max(MIN_SLICECOUNT, Math.min(parseInt(counter.value,10), maxCount));
+
+        counterVal.textContent = counter.value;
+        counterMax.textContent = maxCount;
+        slicewidthMax.textContent = slicewidth.max;
+        slicewidthVal.textContent = slicewidthN;
+        drawCurves(counter.value, slicewidthN);
+    } 
+})
+
+counter.dispatchEvent(new Event('input')); 
 
 
-function drawCurves() {
-    //
+function drawCurves(sliceCount = MIN_SLICECOUNT, sliceWidth = MIN_SLICEWIDTH) {
+    gl.clearRect(0, 0, w, h);
+    const gap = (360-(sliceCount*sliceWidth))/sliceCount;
+    console.log('gap',gap)
     let i=0;
     let x=360;
     let offset = 100;
-    let sliceWidth = 10;
     while (i < x) {
-        
 
         let [endx,endy] = circumferencePoint(i); //end points of curve1
-        let [endx2, endy2] = circumferencePoint(i+sliceWidth) // end points of curve 2
+        let [endx2, endy2] = circumferencePoint(i+parseInt(sliceWidth,10)) // end points of curve 2
         
         //calc midpoints of curves 1,2
         let midx=(centerx+endx)/2; 
@@ -69,23 +97,25 @@ function drawCurves() {
         gl.moveTo(centerx,centery);
         gl.quadraticCurveTo(cpx, cpy, endx, endy);
         
-        gl.arc(centerx, centery, centerx,degToRad(i),degToRad(i+sliceWidth),false);
+        gl.arc(centerx, centery, centerx,degToRad(i),degToRad(i+parseInt(sliceWidth,10)),false);
         gl.quadraticCurveTo(cpx2, cpy2, centerx, centery);
         gl.fill();
-        i += 45;
+        i += (parseInt(sliceWidth,10)+gap);
     }
 }
-drawCurves();
 
+
+//
 function circumferencePoint(deg) { // get the coordinates of a point on the circumference at given angle
     // x = h + r * cos(θ) and y = k + r * sin(θ)
     const x = centerx + centerx * Math.cos(degToRad(deg))
     const y = centery + centerx * Math.sin(degToRad(deg))
     return [x,y]
 }
+
 function degToRad(deg) {
     return deg*Math.PI/180
 }
 
 
-}
+})
